@@ -14,11 +14,12 @@ def ldapQuery(args):
 	else:
 		lmhash,nthash = '',''
 
-
-	if(args.target_ip != None):
-		kdcHost = args.target_ip
-	else:
+	if(args.target_domain == None):
 		kdcHost = domain
+	else:
+		kdcHost = args.target_domain
+
+
 
 	if args.k:
 		target = remoteHost
@@ -111,18 +112,20 @@ def trySMBlogin(compName, passwd, args):
 		passwd = passwd[0:14]
 	if(args.target_ip == None):
 		args.target_ip = address
+	if(args.target_domain != None):
+		domain = args.target_domain
 	else:
 		address = address
 	try:
 		smbConn = SMBConnection(address, args.target_ip, sess_port=445)
 		smbConn.login(compName, passwd, domain, '', '')
 		if( smbConn and passwd == ''):
-				print("[SUCCESS] Machine account created with dsadd Found - Username: %s Password: %s" % (compName,passwd))
+				print("[SUCCESS] Machine account created with dsadd Found - Username: %s and no Password." % (compName))
 
 	except Exception as e:
 		if("STATUS_NOLOGON_WORKSTATION_TRUST_ACCOUNT" in str(e)):
 			if(passwd == ''):
-				print("[SUCCESS] Machine account created with dsadd Found - Username: %s Password: %s" % (compName,passwd))
+				print("[SUCCESS] Machine account created with dsadd Found - Username: %s and no Password." % (compName))
 			else:
 				print("[SUCCESS] Pre-Windows 2000 Machine Account Found - Username: %s Password: %s" % (compName,passwd))
 		if(args.debug == True):
@@ -150,7 +153,6 @@ def args():
 
 	args = parser.parse_args()
 	
-
 	ldapQuery(args)
 
 def main():
